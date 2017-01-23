@@ -1,0 +1,12 @@
+{
+  "pagination": {
+    "limit": 20,
+    "offset": 0,
+    "first": "/v3/releases",
+    "previous": null,
+    "current": "/v3/releases",
+    "next": null,
+    "total": 0
+  },
+  "results": []
+}

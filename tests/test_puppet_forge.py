@@ -20,6 +20,7 @@
 #     Santiago Dueñas <sduenas@bitergia.com>
 #
 
+import datetime
 import sys
 import unittest
 
@@ -31,12 +32,13 @@ import pkg_resources
 sys.path.insert(0, '..')
 pkg_resources.declare_namespace('perceval.backends')
 
-from perceval.backends.puppet.puppet_forge import PuppetForgeClient
+from perceval.backends.puppet.puppet_forge import (PuppetForge,
+                                                   PuppetForgeClient)
 
 
-PUPPET_FORGE_URL = 'http://example.com'
-PUPPET_FORGE_MODULES_URL = PUPPET_FORGE_URL + '/v3/modules'
-PUPPET_FORGE_RELEASES_URL = PUPPET_FORGE_URL + '/v3/releases'
+PUPPET_FORGE_URL = 'https://forge.puppet.com/'
+PUPPET_FORGE_MODULES_URL = PUPPET_FORGE_URL + 'v3/modules'
+PUPPET_FORGE_RELEASES_URL = PUPPET_FORGE_URL + 'v3/releases'
 
 
 def read_file(filename, mode='r'):
@@ -55,6 +57,8 @@ def setup_http_server():
         read_file('data/puppet_forge/puppet_forge_modules_next.json', 'rb')
     ]
     ceph_body =  read_file('data/puppet_forge/puppet_forge_releases_ceph.json', 'rb')
+    nomad_body = read_file('data/puppet_forge/puppet_forge_releases_nomad.json', 'rb')
+    empty_body = read_file('data/puppet_forge/puppet_forge_empty.json', 'rb')
 
 
     def request_callback(method, uri, headers):
@@ -68,6 +72,10 @@ def setup_http_server():
 
             if module == 'norisnetwork-ceph':
                 body = ceph_body
+            elif module == 'sshuyskiy-nomad':
+                body = nomad_body
+            else:
+                body = empty_body
         else:
             raise
 
@@ -89,6 +97,193 @@ def setup_http_server():
                            ])
 
     return http_requests
+
+
+class TestPuppetForgeBackend(unittest.TestCase):
+    """Puppet forge backend tests"""
+
+    def test_initialization(self):
+        """Test whether attributes are initializated"""
+
+        forge = PuppetForge(max_items=5, tag='test')
+
+        self.assertEqual(forge.origin, 'https://forge.puppet.com/')
+        self.assertEqual(forge.tag, 'test')
+        self.assertEqual(forge.max_items, 5)
+        self.assertIsInstance(forge.client, PuppetForgeClient)
+
+        # When tag is empty or None it will be set to
+        # the value in URL
+        forge = PuppetForge(max_items=5)
+        self.assertEqual(forge.origin, 'https://forge.puppet.com/')
+        self.assertEqual(forge.tag, 'https://forge.puppet.com/')
+
+        forge = PuppetForge(max_items=5, tag='')
+        self.assertEqual(forge.origin, 'https://forge.puppet.com/')
+        self.assertEqual(forge.tag, 'https://forge.puppet.com/')
+
+    def test_has_caching(self):
+        """Test if it returns False when has_caching is called"""
+
+        self.assertEqual(PuppetForge.has_caching(), False)
+
+    def test_has_resuming(self):
+        """Test if it returns False when has_resuming is called"""
+
+        self.assertEqual(PuppetForge.has_resuming(), False)
+
+    @httpretty.activate
+    def test_fetch(self):
+        """Test whether it fetches a set of modules"""
+
+        http_requests = setup_http_server()
+
+        forge = PuppetForge(max_items=2)
+        modules = [module for module in forge.fetch()]
+
+        expected = [('ceph', 'a7709201e03bfec46e34e4d0065bb8bdc3f4e5b9', 1484906394.0, 2),
+                    ('nomad', '2fea1072d8ef4d107839c20b7d9926574c4df587', 1484896006.0, 1),
+                    ('consul', '234b9505bf47f2f48f8576a9a906732fe6c06e3c', 1484895908.0, 0)]
+
+        self.assertEqual(len(modules), len(expected))
+
+        for x in range(len(modules)):
+            module = modules[x]
+            expc = expected[x]
+            self.assertEqual(module['data']['name'], expc[0])
+            self.assertEqual(module['uuid'], expc[1])
+            self.assertEqual(module['origin'], 'https://forge.puppet.com/')
+            self.assertEqual(module['updated_on'], expc[2])
+            self.assertEqual(module['category'], 'module')
+            self.assertEqual(module['tag'], 'https://forge.puppet.com/')
+            self.assertEqual(len(module['data']['releases']), expc[3])
+
+        # Check requests
+        expected = [
+            {
+             'limit' : ['2'],
+             'sort_by' : ['latest_release']
+            },
+            {
+             'limit' : ['2'],
+             'module' : ['norisnetwork-ceph'],
+             'show_deleted' : ['true'],
+             'sort_by' : ['release_date']
+            },
+            {
+             'limit' : ['2'],
+             'module' : ['sshuyskiy-nomad'],
+             'show_deleted' : ['true'],
+             'sort_by' : ['release_date']
+            },
+            {
+             'limit' : ['2'],
+             'offset' : ['2'],
+             'sort_by' : ['latest_release']
+            },
+            {
+             'limit' : ['2'],
+             'module' : ['sshuyskiy-consul'],
+             'show_deleted' : ['true'],
+             'sort_by' : ['release_date']
+            }
+        ]
+
+        self.assertEqual(len(http_requests), len(expected))
+
+        for i in range(len(expected)):
+            self.assertDictEqual(http_requests[i].querystring, expected[i])
+
+    @httpretty.activate
+    def test_fetch_from_date(self):
+        """Test whether if fetches a set of modules from the given date"""
+
+        http_requests = setup_http_server()
+
+        from_date = datetime.datetime(2017, 1, 20, 8, 0, 0)
+
+        forge = PuppetForge(max_items=2)
+        modules = [module for module in forge.fetch(from_date=from_date)]
+
+        expected = [('ceph', 'a7709201e03bfec46e34e4d0065bb8bdc3f4e5b9', 1484906394.0, 2)]
+
+        self.assertEqual(len(modules), len(expected))
+
+        for x in range(len(modules)):
+            module = modules[x]
+            expc = expected[x]
+            self.assertEqual(module['data']['name'], expc[0])
+            self.assertEqual(module['uuid'], expc[1])
+            self.assertEqual(module['origin'], 'https://forge.puppet.com/')
+            self.assertEqual(module['updated_on'], expc[2])
+            self.assertEqual(module['category'], 'module')
+            self.assertEqual(module['tag'], 'https://forge.puppet.com/')
+            self.assertEqual(len(module['data']['releases']), expc[3])
+
+        # Check requests
+        expected = [
+            {
+             'limit' : ['2'],
+             'sort_by' : ['latest_release']
+            },
+            {
+             'limit' : ['2'],
+             'module' : ['norisnetwork-ceph'],
+             'show_deleted' : ['true'],
+             'sort_by' : ['release_date']
+            }
+        ]
+
+        self.assertEqual(len(http_requests), len(expected))
+
+        for i in range(len(expected)):
+            self.assertDictEqual(http_requests[i].querystring, expected[i])
+
+    @httpretty.activate
+    def test_fetch_empty(self):
+        """Test if nothing is returned when there are no modules"""
+
+        http_requests = setup_http_server()
+
+        from_date = datetime.datetime(2017, 1, 21)
+
+        forge = PuppetForge(max_items=2)
+        modules = [module for module in forge.fetch(from_date=from_date)]
+
+        self.assertEqual(len(modules), 0)
+
+        # Check requests
+        expected = [
+            {
+             'limit' : ['2'],
+             'sort_by' : ['latest_release']
+            }
+        ]
+
+        self.assertEqual(len(http_requests), len(expected))
+
+        for i in range(len(expected)):
+            self.assertDictEqual(http_requests[i].querystring, expected[i])
+
+    def test_parse_json(self):
+        """Test if it parses a JSON stream"""
+
+        raw_json = read_file('data/puppet_forge/puppet_forge_modules.json')
+
+        items = PuppetForge.parse_json(raw_json)
+        results = [item for item in items]
+
+        self.assertEqual(len(results), 2)
+        self.assertEqual(results[0]['name'], 'ceph')
+        self.assertEqual(results[1]['name'], 'nomad')
+
+        # Parse a file without results
+        raw_json = read_file('data/puppet_forge/puppet_forge_empty.json')
+
+        items = PuppetForge.parse_json(raw_json)
+        results = [item for item in items]
+
+        self.assertEqual(len(results), 0)
 
 
 class TestPuppetForgeClient(unittest.TestCase):

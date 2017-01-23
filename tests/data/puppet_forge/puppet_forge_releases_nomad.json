@@ -1,0 +1,60 @@
+{
+  "pagination": {
+    "limit": 20,
+    "offset": 0,
+    "first": "/v3/releases?module=sshuyskiy-nomad&limit=20&offset=0",
+    "previous": null,
+    "current": "/v3/releases?module=sshuyskiy-nomad&limit=20&offset=0",
+    "next": null,
+    "total": 1
+  },
+  "results": [
+    {
+      "uri": "/v3/releases/sshuyskiy-nomad-0.1.1",
+      "slug": "sshuyskiy-nomad-0.1.1",
+      "module": {
+        "uri": "/v3/modules/sshuyskiy-nomad",
+        "slug": "sshuyskiy-nomad",
+        "name": "nomad",
+        "owner": {
+          "uri": "/v3/users/sshuyskiy",
+          "slug": "sshuyskiy",
+          "username": "sshuyskiy",
+          "gravatar_id": "930b57534350a6a4db46e5c1585f0d89"
+        }
+      },
+      "version": "0.1.1",
+      "metadata": {
+        "name": "sshuyskiy-nomad",
+        "version": "0.1.1",
+        "author": "sshuyskiy",
+        "summary": "nomad config template",
+        "license": "Apache-2.0",
+        "source": "https://github.com/fireya/puppet/modules/nomad",
+        "project_page": "https://github.com/fireya/puppet/modules/nomad",
+        "issues_url": "https://github.com/fireya/puppet/modules/nomad/issues",
+        "dependencies": [
+          {
+            "name": "puppetlabs-stdlib",
+            "version_requirement": ">= 1.0.0"
+          }
+        ],
+        "data_provider": null
+      },
+      "tags": [],
+      "supported": false,
+      "validation_score": 75,
+      "file_uri": "/v3/files/sshuyskiy-nomad-0.1.1.tar.gz",
+      "file_size": 2608,
+      "file_md5": "f7ba3f83d3eba3374f66ba3b424ab605",
+      "downloads": 242,
+      "readme": "# nomad config template",
+      "changelog": null,
+      "license": null,
+      "created_at": "2017-01-19 23:06:46 -0800",
+      "updated_at": "2017-01-19 23:11:03 -0800",
+      "deleted_at": null,
+      "deleted_for": null
+    }
+  ]
+}
