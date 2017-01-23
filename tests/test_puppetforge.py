@@ -34,9 +34,9 @@ sys.path.insert(0, '..')
 pkg_resources.declare_namespace('perceval.backends')
 
 from perceval.backend import BackendCommandArgumentParser
-from perceval.backends.puppet.puppet_forge import (PuppetForge,
-                                                   PuppetForgeClient,
-                                                   PuppetForgeCommand)
+from perceval.backends.puppet.puppetforge import (PuppetForge,
+                                                  PuppetForgeClient,
+                                                  PuppetForgeCommand)
 
 
 PUPPET_FORGE_URL = 'https://forge.puppet.com/'
@@ -56,12 +56,12 @@ def setup_http_server():
     http_requests = []
 
     modules_bodies = [
-        read_file('data/puppet_forge/puppet_forge_modules.json', 'rb'),
-        read_file('data/puppet_forge/puppet_forge_modules_next.json', 'rb')
+        read_file('data/puppetforge/puppetforge_modules.json', 'rb'),
+        read_file('data/puppetforge/puppetforge_modules_next.json', 'rb')
     ]
-    ceph_body =  read_file('data/puppet_forge/puppet_forge_releases_ceph.json', 'rb')
-    nomad_body = read_file('data/puppet_forge/puppet_forge_releases_nomad.json', 'rb')
-    empty_body = read_file('data/puppet_forge/puppet_forge_empty.json', 'rb')
+    ceph_body =  read_file('data/puppetforge/puppetforge_releases_ceph.json', 'rb')
+    nomad_body = read_file('data/puppetforge/puppetforge_releases_nomad.json', 'rb')
+    empty_body = read_file('data/puppetforge/puppetforge_empty.json', 'rb')
 
 
     def request_callback(method, uri, headers):
@@ -271,7 +271,7 @@ class TestPuppetForgeBackend(unittest.TestCase):
     def test_parse_json(self):
         """Test if it parses a JSON stream"""
 
-        raw_json = read_file('data/puppet_forge/puppet_forge_modules.json')
+        raw_json = read_file('data/puppetforge/puppetforge_modules.json')
 
         items = PuppetForge.parse_json(raw_json)
         results = [item for item in items]
@@ -281,7 +281,7 @@ class TestPuppetForgeBackend(unittest.TestCase):
         self.assertEqual(results[1]['name'], 'nomad')
 
         # Parse a file without results
-        raw_json = read_file('data/puppet_forge/puppet_forge_empty.json')
+        raw_json = read_file('data/puppetforge/puppetforge_empty.json')
 
         items = PuppetForge.parse_json(raw_json)
         results = [item for item in items]
