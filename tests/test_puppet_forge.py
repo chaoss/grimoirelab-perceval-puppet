@@ -24,6 +24,7 @@ import datetime
 import sys
 import unittest
 
+import dateutil.tz
 import httpretty
 import pkg_resources
 
@@ -32,8 +33,10 @@ import pkg_resources
 sys.path.insert(0, '..')
 pkg_resources.declare_namespace('perceval.backends')
 
+from perceval.backend import BackendCommandArgumentParser
 from perceval.backends.puppet.puppet_forge import (PuppetForge,
-                                                   PuppetForgeClient)
+                                                   PuppetForgeClient,
+                                                   PuppetForgeCommand)
 
 
 PUPPET_FORGE_URL = 'https://forge.puppet.com/'
@@ -365,6 +368,33 @@ class TestPuppetForgeClient(unittest.TestCase):
             self.assertEqual(req.method, 'GET')
             self.assertRegex(req.path, '/v3/releases')
             self.assertDictEqual(req.querystring, expected[x])
+
+
+class TestPuppetForgeCommand(unittest.TestCase):
+    """Tests for PuppetForgeCommand class"""
+
+    def test_backend_class(self):
+        """Test if the backend class is PuppetForge"""
+
+        self.assertIs(PuppetForgeCommand.BACKEND, PuppetForge)
+
+    def test_setup_cmd_parser(self):
+        """Test if it parser object is correctly initialized"""
+
+        parser = PuppetForgeCommand.setup_cmd_parser()
+        self.assertIsInstance(parser, BackendCommandArgumentParser)
+
+        args = ['--max-items', '5',
+                '--tag', 'test',
+                '--from-date', '2016-01-01']
+
+        expected_ts = datetime.datetime(2016, 1, 1, 0, 0, 0,
+                                        tzinfo=dateutil.tz.tzutc())
+
+        parsed_args = parser.parse(*args)
+        self.assertEqual(parsed_args.max_items, 5)
+        self.assertEqual(parsed_args.tag, 'test')
+        self.assertEqual(parsed_args.from_date, expected_ts)
 
 
 if __name__ == "__main__":

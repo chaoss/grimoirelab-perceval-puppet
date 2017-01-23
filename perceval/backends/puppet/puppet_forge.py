@@ -25,7 +25,10 @@ import logging
 
 import requests
 
-from ...backend import Backend, metadata
+from ...backend import (Backend,
+                        BackendCommand,
+                        BackendCommandArgumentParser,
+                        metadata)
 from ...utils import (DEFAULT_DATETIME,
                       datetime_to_utc,
                       str_to_datetime,
@@ -270,3 +273,23 @@ class PuppetForgeClient:
                 params = {}
             else:
                 do_fetch = False
+
+
+class PuppetForgeCommand(BackendCommand):
+    """Class to run PuppetForge backend from the command line."""
+
+    BACKEND = PuppetForge
+
+    @staticmethod
+    def setup_cmd_parser():
+        """Returns the Puppet Forge argument parser."""
+
+        parser = BackendCommandArgumentParser(from_date=True)
+
+        # Puppet Forge options
+        group = parser.parser.add_argument_group('Puppet Forge arguments')
+        group.add_argument('--max-items', dest='max_items',
+                           type=int, default=MAX_ITEMS,
+                           help="Maximum number of items requested on the same query")
+
+        return parser
