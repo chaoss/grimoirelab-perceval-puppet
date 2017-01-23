@@ -1,0 +1,2 @@
+requests>=2.7.0
+-e git+https://github.com/grimoirelab/perceval.git/#egg=perceval
