@@ -300,6 +300,14 @@ class TestPuppetForgeBackend(unittest.TestCase):
 
         self.assertEqual(len(results), 0)
 
+        # Parse a file without a 'results' key
+        raw_json = read_file('data/puppetforge/puppetforge_user_norisnetwork.json')
+
+        result = PuppetForge.parse_json(raw_json)
+
+        self.assertEqual(result['username'], 'norisnetwork')
+        self.assertEqual(result['display_name'], 'noris network AG')
+
 
 class TestPuppetForgeClient(unittest.TestCase):
     """PuppetForgeClient REST API unit tests.

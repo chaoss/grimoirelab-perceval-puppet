@@ -182,7 +182,11 @@ class PuppetForge(Backend):
         :returns: a list with the parsed data
         """
         result = json.loads(raw_json)
-        return result['results']
+
+        if 'results' in result:
+            result = result['results']
+
+        return result
 
 
 class PuppetForgeClient:
