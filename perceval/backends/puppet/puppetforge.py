@@ -51,7 +51,7 @@ class PuppetForge(Backend):
     :param max_items: maximum number of items requested on the same query
     :param tag: label used to mark the data
     """
-    version = '0.1.0'
+    version = '0.2.0'
 
     def __init__(self, max_items=MAX_ITEMS, tag=None):
         origin = PUPPET_FORGE_URL
@@ -59,6 +59,7 @@ class PuppetForge(Backend):
         super().__init__(origin, tag=tag)
         self.max_items = max_items
         self.client = PuppetForgeClient(PUPPET_FORGE_URL, max_items=max_items)
+        self._owners = {}
 
     @metadata
     def fetch(self, from_date=DEFAULT_DATETIME):
@@ -100,6 +101,7 @@ class PuppetForge(Backend):
                 owner = module['owner']['username']
                 name = module['name']
                 module['releases'] = self.__fetch_and_parse_releases(owner, name)
+                module['owner_data'] = self.__get_or_fetch_owner(owner)
 
                 yield module
                 nmodules += 1
@@ -121,6 +123,19 @@ class PuppetForge(Backend):
                 releases.append(release)
 
         return releases
+
+    def __get_or_fetch_owner(self, owner):
+        if owner in self._owners:
+            return self._owners[owner]
+
+        logger.debug("Owner %s not found on client cache; fetching it", owner)
+
+        raw_owner = self.client.user(owner)
+        data = self.parse_json(raw_owner)
+
+        self._owners[owner] = data
+
+        return data
 
     @classmethod
     def has_caching(cls):

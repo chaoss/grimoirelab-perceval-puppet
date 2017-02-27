@@ -44,6 +44,7 @@ PUPPET_FORGE_MODULES_URL = PUPPET_FORGE_URL + 'v3/modules'
 PUPPET_FORGE_RELEASES_URL = PUPPET_FORGE_URL + 'v3/releases'
 PUPPET_FORGE_USERS_URL = PUPPET_FORGE_URL + 'v3/users/'
 PUPPET_FORGE_USER_NORISNETWORK_URL = PUPPET_FORGE_USERS_URL + 'norisnetwork'
+PUPPET_FORGE_USER_SSHUYSKIY_URL = PUPPET_FORGE_USERS_URL + 'sshuyskiy'
 
 
 def read_file(filename, mode='r'):
@@ -66,6 +67,7 @@ def setup_http_server():
     empty_body = read_file('data/puppetforge/puppetforge_empty.json', 'rb')
 
     norisnetwork_body = read_file('data/puppetforge/puppetforge_user_norisnetwork.json', 'rb')
+    sshuyskiy_body = read_file('data/puppetforge/puppetforge_user_sshuyskiy.json', 'rb')
 
 
     def request_callback(method, uri, headers):
@@ -85,6 +87,8 @@ def setup_http_server():
                 body = empty_body
         elif uri.startswith(PUPPET_FORGE_USER_NORISNETWORK_URL):
             body = norisnetwork_body
+        elif uri.startswith(PUPPET_FORGE_USER_SSHUYSKIY_URL):
+            body = sshuyskiy_body
         else:
             raise
 
@@ -106,6 +110,13 @@ def setup_http_server():
                            ])
     httpretty.register_uri(httpretty.GET,
                            PUPPET_FORGE_USER_NORISNETWORK_URL,
+                           responses=[
+                                httpretty.Response(body=request_callback) \
+                                    for _ in range(1)
+                           ])
+
+    httpretty.register_uri(httpretty.GET,
+                           PUPPET_FORGE_USER_SSHUYSKIY_URL,
                            responses=[
                                 httpretty.Response(body=request_callback) \
                                     for _ in range(1)
@@ -156,9 +167,9 @@ class TestPuppetForgeBackend(unittest.TestCase):
         forge = PuppetForge(max_items=2)
         modules = [module for module in forge.fetch()]
 
-        expected = [('ceph', 'a7709201e03bfec46e34e4d0065bb8bdc3f4e5b9', 1484906394.0, 2),
-                    ('nomad', '2fea1072d8ef4d107839c20b7d9926574c4df587', 1484896006.0, 1),
-                    ('consul', '234b9505bf47f2f48f8576a9a906732fe6c06e3c', 1484895908.0, 0)]
+        expected = [('ceph', 'a7709201e03bfec46e34e4d0065bb8bdc3f4e5b9', 1484906394.0, 2, 'noris network AG'),
+                    ('nomad', '2fea1072d8ef4d107839c20b7d9926574c4df587', 1484896006.0, 1, 'sshuyskiy'),
+                    ('consul', '234b9505bf47f2f48f8576a9a906732fe6c06e3c', 1484895908.0, 0, 'sshuyskiy')]
 
         self.assertEqual(len(modules), len(expected))
 
@@ -172,6 +183,7 @@ class TestPuppetForgeBackend(unittest.TestCase):
             self.assertEqual(module['category'], 'module')
             self.assertEqual(module['tag'], 'https://forge.puppet.com/')
             self.assertEqual(len(module['data']['releases']), expc[3])
+            self.assertEqual(module['data']['owner_data']['display_name'], expc[4])
 
         # Check requests
         expected = [
@@ -185,12 +197,14 @@ class TestPuppetForgeBackend(unittest.TestCase):
              'show_deleted' : ['true'],
              'sort_by' : ['release_date']
             },
+            {},
             {
              'limit' : ['2'],
              'module' : ['sshuyskiy-nomad'],
              'show_deleted' : ['true'],
              'sort_by' : ['release_date']
             },
+            {},
             {
              'limit' : ['2'],
              'offset' : ['2'],
@@ -220,7 +234,7 @@ class TestPuppetForgeBackend(unittest.TestCase):
         forge = PuppetForge(max_items=2)
         modules = [module for module in forge.fetch(from_date=from_date)]
 
-        expected = [('ceph', 'a7709201e03bfec46e34e4d0065bb8bdc3f4e5b9', 1484906394.0, 2)]
+        expected = [('ceph', 'a7709201e03bfec46e34e4d0065bb8bdc3f4e5b9', 1484906394.0, 2, 'noris network AG')]
 
         self.assertEqual(len(modules), len(expected))
 
@@ -234,6 +248,7 @@ class TestPuppetForgeBackend(unittest.TestCase):
             self.assertEqual(module['category'], 'module')
             self.assertEqual(module['tag'], 'https://forge.puppet.com/')
             self.assertEqual(len(module['data']['releases']), expc[3])
+            self.assertEqual(module['data']['owner_data']['display_name'], expc[4])
 
         # Check requests
         expected = [
@@ -246,7 +261,8 @@ class TestPuppetForgeBackend(unittest.TestCase):
              'module' : ['norisnetwork-ceph'],
              'show_deleted' : ['true'],
              'sort_by' : ['release_date']
-            }
+            },
+            {}
         ]
 
         self.assertEqual(len(http_requests), len(expected))
