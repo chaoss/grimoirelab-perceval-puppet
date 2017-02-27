@@ -42,6 +42,8 @@ from perceval.backends.puppet.puppetforge import (PuppetForge,
 PUPPET_FORGE_URL = 'https://forge.puppet.com/'
 PUPPET_FORGE_MODULES_URL = PUPPET_FORGE_URL + 'v3/modules'
 PUPPET_FORGE_RELEASES_URL = PUPPET_FORGE_URL + 'v3/releases'
+PUPPET_FORGE_USERS_URL = PUPPET_FORGE_URL + 'v3/users/'
+PUPPET_FORGE_USER_NORISNETWORK_URL = PUPPET_FORGE_USERS_URL + 'norisnetwork'
 
 
 def read_file(filename, mode='r'):
@@ -63,6 +65,8 @@ def setup_http_server():
     nomad_body = read_file('data/puppetforge/puppetforge_releases_nomad.json', 'rb')
     empty_body = read_file('data/puppetforge/puppetforge_empty.json', 'rb')
 
+    norisnetwork_body = read_file('data/puppetforge/puppetforge_user_norisnetwork.json', 'rb')
+
 
     def request_callback(method, uri, headers):
         last_request = httpretty.last_request()
@@ -79,6 +83,8 @@ def setup_http_server():
                 body = nomad_body
             else:
                 body = empty_body
+        elif uri.startswith(PUPPET_FORGE_USER_NORISNETWORK_URL):
+            body = norisnetwork_body
         else:
             raise
 
@@ -94,6 +100,12 @@ def setup_http_server():
                            ])
     httpretty.register_uri(httpretty.GET,
                            PUPPET_FORGE_RELEASES_URL,
+                           responses=[
+                                httpretty.Response(body=request_callback) \
+                                    for _ in range(1)
+                           ])
+    httpretty.register_uri(httpretty.GET,
+                           PUPPET_FORGE_USER_NORISNETWORK_URL,
                            responses=[
                                 httpretty.Response(body=request_callback) \
                                     for _ in range(1)
@@ -368,6 +380,24 @@ class TestPuppetForgeClient(unittest.TestCase):
             self.assertEqual(req.method, 'GET')
             self.assertRegex(req.path, '/v3/releases')
             self.assertDictEqual(req.querystring, expected[x])
+
+    @httpretty.activate
+    def test_user(self):
+        """Test user API call"""
+
+        http_requests = setup_http_server()
+
+        client = PuppetForgeClient(PUPPET_FORGE_URL, max_items=2)
+
+        # Call API
+        _ = client.user('norisnetwork')
+
+        self.assertEqual(len(http_requests), 1)
+
+        req = http_requests[0]
+        self.assertEqual(req.method, 'GET')
+        self.assertRegex(req.path, '/v3/users/norisnetwork')
+        self.assertDictEqual(req.querystring, {})
 
 
 class TestPuppetForgeCommand(unittest.TestCase):

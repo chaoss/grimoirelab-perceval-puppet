@@ -199,6 +199,7 @@ class PuppetForgeClient:
     """
     RMODULES = 'modules'
     RRELEASES = 'releases'
+    RUSER = 'users'
 
     PLIMIT = 'limit'
     PMODULE = 'module'
@@ -241,6 +242,16 @@ class PuppetForgeClient:
         for page in self._fetch(resource, params):
             yield page
 
+    def user(self, user):
+        """Fetch user data."""
+
+        resource = self.RUSER + '/' + user
+        params = {}
+
+        result = [page for page in self._fetch(resource, params)]
+
+        return result[0]
+
     def _fetch(self, resource, params):
         """Fetch a resource.
 
@@ -265,12 +276,17 @@ class PuppetForgeClient:
             r.raise_for_status()
             yield r.text
 
-            next_url = r.json()['pagination']['next']
+            json_data = r.json()
 
-            if next_url:
-                # Params are already included in the URL
-                url = urljoin(self.base_url, next_url)
-                params = {}
+            if 'pagination' in json_data:
+                next_url = json_data['pagination']['next']
+
+                if next_url:
+                    # Params are already included in the URL
+                    url = urljoin(self.base_url, next_url)
+                    params = {}
+                else:
+                    do_fetch = False
             else:
                 do_fetch = False
 
