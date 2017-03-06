@@ -228,7 +228,6 @@ class PuppetForgeClient:
     VLATEST_RELEASE = 'latest_release'
     VRELEASE_DATE = 'release_date'
 
-
     def __init__(self, base_url, max_items=MAX_ITEMS):
         self.base_url = base_url
         self.max_items = max_items
@@ -239,8 +238,8 @@ class PuppetForgeClient:
         resource = self.RMODULES
 
         params = {
-            self.PLIMIT : self.max_items,
-            self.PSORT_BY : self.VLATEST_RELEASE
+            self.PLIMIT: self.max_items,
+            self.PSORT_BY: self.VLATEST_RELEASE
         }
 
         for page in self._fetch(resource, params):
@@ -252,10 +251,10 @@ class PuppetForgeClient:
         resource = self.RRELEASES
 
         params = {
-            self.PMODULE : owner + '-' + module,
-            self.PLIMIT : self.max_items,
-            self.PSHOW_DELETED : 'true',
-            self.PSORT_BY : self.VRELEASE_DATE,
+            self.PMODULE: owner + '-' + module,
+            self.PLIMIT: self.max_items,
+            self.PSHOW_DELETED: 'true',
+            self.PSORT_BY: self.VRELEASE_DATE,
         }
 
         for page in self._fetch(resource, params):
