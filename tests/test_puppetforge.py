@@ -62,13 +62,12 @@ def setup_http_server():
         read_file('data/puppetforge/puppetforge_modules.json', 'rb'),
         read_file('data/puppetforge/puppetforge_modules_next.json', 'rb')
     ]
-    ceph_body =  read_file('data/puppetforge/puppetforge_releases_ceph.json', 'rb')
+    ceph_body = read_file('data/puppetforge/puppetforge_releases_ceph.json', 'rb')
     nomad_body = read_file('data/puppetforge/puppetforge_releases_nomad.json', 'rb')
     empty_body = read_file('data/puppetforge/puppetforge_empty.json', 'rb')
 
     norisnetwork_body = read_file('data/puppetforge/puppetforge_user_norisnetwork.json', 'rb')
     sshuyskiy_body = read_file('data/puppetforge/puppetforge_user_sshuyskiy.json', 'rb')
-
 
     def request_callback(method, uri, headers):
         last_request = httpretty.last_request()
@@ -188,33 +187,33 @@ class TestPuppetForgeBackend(unittest.TestCase):
         # Check requests
         expected = [
             {
-             'limit' : ['2'],
-             'sort_by' : ['latest_release']
+             'limit': ['2'],
+             'sort_by': ['latest_release']
             },
             {
-             'limit' : ['2'],
-             'module' : ['norisnetwork-ceph'],
-             'show_deleted' : ['true'],
-             'sort_by' : ['release_date']
-            },
-            {},
-            {
-             'limit' : ['2'],
-             'module' : ['sshuyskiy-nomad'],
-             'show_deleted' : ['true'],
-             'sort_by' : ['release_date']
+             'limit': ['2'],
+             'module': ['norisnetwork-ceph'],
+             'show_deleted': ['true'],
+             'sort_by': ['release_date']
             },
             {},
             {
-             'limit' : ['2'],
-             'offset' : ['2'],
-             'sort_by' : ['latest_release']
+             'limit': ['2'],
+             'module': ['sshuyskiy-nomad'],
+             'show_deleted': ['true'],
+             'sort_by': ['release_date']
+            },
+            {},
+            {
+             'limit': ['2'],
+             'offset': ['2'],
+             'sort_by': ['latest_release']
             },
             {
-             'limit' : ['2'],
-             'module' : ['sshuyskiy-consul'],
-             'show_deleted' : ['true'],
-             'sort_by' : ['release_date']
+             'limit': ['2'],
+             'module': ['sshuyskiy-consul'],
+             'show_deleted': ['true'],
+             'sort_by': ['release_date']
             }
         ]
 
@@ -253,14 +252,14 @@ class TestPuppetForgeBackend(unittest.TestCase):
         # Check requests
         expected = [
             {
-             'limit' : ['2'],
-             'sort_by' : ['latest_release']
+             'limit': ['2'],
+             'sort_by': ['latest_release']
             },
             {
-             'limit' : ['2'],
-             'module' : ['norisnetwork-ceph'],
-             'show_deleted' : ['true'],
-             'sort_by' : ['release_date']
+             'limit': ['2'],
+             'module': ['norisnetwork-ceph'],
+             'show_deleted': ['true'],
+             'sort_by': ['release_date']
             },
             {}
         ]
@@ -286,8 +285,8 @@ class TestPuppetForgeBackend(unittest.TestCase):
         # Check requests
         expected = [
             {
-             'limit' : ['2'],
-             'sort_by' : ['latest_release']
+             'limit': ['2'],
+             'sort_by': ['latest_release']
             }
         ]
 
@@ -356,13 +355,13 @@ class TestPuppetForgeClient(unittest.TestCase):
 
         expected = [
             {
-             'limit' : ['2'],
-             'sort_by' : ['latest_release']
+             'limit': ['2'],
+             'sort_by': ['latest_release']
             },
             {
-             'limit' : ['2'],
-             'offset' : ['2'],
-             'sort_by' : ['latest_release']
+             'limit': ['2'],
+             'offset': ['2'],
+             'sort_by': ['latest_release']
             },
         ]
 
@@ -390,10 +389,10 @@ class TestPuppetForgeClient(unittest.TestCase):
 
         expected = [
             {
-             'limit' : ['2'],
-             'module' : ['norisnetwork-ceph'],
-             'show_deleted' : ['true'],
-             'sort_by' : ['release_date']
+             'limit': ['2'],
+             'module': ['norisnetwork-ceph'],
+             'show_deleted': ['true'],
+             'sort_by': ['release_date']
             }
         ]
 
