@@ -98,27 +98,27 @@ def setup_http_server():
     httpretty.register_uri(httpretty.GET,
                            PUPPET_FORGE_MODULES_URL,
                            responses=[
-                                httpretty.Response(body=request_callback) \
-                                    for _ in range(2)
+                               httpretty.Response(body=request_callback)
+                               for _ in range(2)
                            ])
     httpretty.register_uri(httpretty.GET,
                            PUPPET_FORGE_RELEASES_URL,
                            responses=[
-                                httpretty.Response(body=request_callback) \
-                                    for _ in range(1)
+                               httpretty.Response(body=request_callback)
+                               for _ in range(1)
                            ])
     httpretty.register_uri(httpretty.GET,
                            PUPPET_FORGE_USER_NORISNETWORK_URL,
                            responses=[
-                                httpretty.Response(body=request_callback) \
-                                    for _ in range(1)
+                               httpretty.Response(body=request_callback)
+                               for _ in range(1)
                            ])
 
     httpretty.register_uri(httpretty.GET,
                            PUPPET_FORGE_USER_SSHUYSKIY_URL,
                            responses=[
-                                httpretty.Response(body=request_callback) \
-                                    for _ in range(1)
+                               httpretty.Response(body=request_callback)
+                               for _ in range(1)
                            ])
 
     return http_requests
@@ -187,33 +187,33 @@ class TestPuppetForgeBackend(unittest.TestCase):
         # Check requests
         expected = [
             {
-             'limit': ['2'],
-             'sort_by': ['latest_release']
+                'limit': ['2'],
+                'sort_by': ['latest_release']
             },
             {
-             'limit': ['2'],
-             'module': ['norisnetwork-ceph'],
-             'show_deleted': ['true'],
-             'sort_by': ['release_date']
-            },
-            {},
-            {
-             'limit': ['2'],
-             'module': ['sshuyskiy-nomad'],
-             'show_deleted': ['true'],
-             'sort_by': ['release_date']
+                'limit': ['2'],
+                'module': ['norisnetwork-ceph'],
+                'show_deleted': ['true'],
+                'sort_by': ['release_date']
             },
             {},
             {
-             'limit': ['2'],
-             'offset': ['2'],
-             'sort_by': ['latest_release']
+                'limit': ['2'],
+                'module': ['sshuyskiy-nomad'],
+                'show_deleted': ['true'],
+                'sort_by': ['release_date']
+            },
+            {},
+            {
+                'limit': ['2'],
+                'offset': ['2'],
+                'sort_by': ['latest_release']
             },
             {
-             'limit': ['2'],
-             'module': ['sshuyskiy-consul'],
-             'show_deleted': ['true'],
-             'sort_by': ['release_date']
+                'limit': ['2'],
+                'module': ['sshuyskiy-consul'],
+                'show_deleted': ['true'],
+                'sort_by': ['release_date']
             }
         ]
 
@@ -252,14 +252,14 @@ class TestPuppetForgeBackend(unittest.TestCase):
         # Check requests
         expected = [
             {
-             'limit': ['2'],
-             'sort_by': ['latest_release']
+                'limit': ['2'],
+                'sort_by': ['latest_release']
             },
             {
-             'limit': ['2'],
-             'module': ['norisnetwork-ceph'],
-             'show_deleted': ['true'],
-             'sort_by': ['release_date']
+                'limit': ['2'],
+                'module': ['norisnetwork-ceph'],
+                'show_deleted': ['true'],
+                'sort_by': ['release_date']
             },
             {}
         ]
@@ -285,8 +285,8 @@ class TestPuppetForgeBackend(unittest.TestCase):
         # Check requests
         expected = [
             {
-             'limit': ['2'],
-             'sort_by': ['latest_release']
+                'limit': ['2'],
+                'sort_by': ['latest_release']
             }
         ]
 
@@ -355,13 +355,13 @@ class TestPuppetForgeClient(unittest.TestCase):
 
         expected = [
             {
-             'limit': ['2'],
-             'sort_by': ['latest_release']
+                'limit': ['2'],
+                'sort_by': ['latest_release']
             },
             {
-             'limit': ['2'],
-             'offset': ['2'],
-             'sort_by': ['latest_release']
+                'limit': ['2'],
+                'offset': ['2'],
+                'sort_by': ['latest_release']
             },
         ]
 
@@ -389,10 +389,10 @@ class TestPuppetForgeClient(unittest.TestCase):
 
         expected = [
             {
-             'limit': ['2'],
-             'module': ['norisnetwork-ceph'],
-             'show_deleted': ['true'],
-             'sort_by': ['release_date']
+                'limit': ['2'],
+                'module': ['norisnetwork-ceph'],
+                'show_deleted': ['true'],
+                'sort_by': ['release_date']
             }
         ]
 
