@@ -45,7 +45,7 @@ except (IOError, ImportError):
         long_description = f.read()
 
 
-version = '0.1.0.dev2'
+version = '0.1.0.dev3'
 
 
 setup(name="perceval-puppet",
