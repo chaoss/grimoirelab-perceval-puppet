@@ -25,14 +25,15 @@ import logging
 
 import requests
 
+from grimoirelab.toolkit.datetime import datetime_to_utc, str_to_datetime
+from grimoirelab.toolkit.uris import urijoin
+
+
 from ...backend import (Backend,
                         BackendCommand,
                         BackendCommandArgumentParser,
                         metadata)
-from ...utils import (DEFAULT_DATETIME,
-                      datetime_to_utc,
-                      str_to_datetime,
-                      urljoin)
+from ...utils import DEFAULT_DATETIME
 
 
 logger = logging.getLogger(__name__)
@@ -282,7 +283,7 @@ class PuppetForgeClient:
 
         :returns: a generator of pages for the requested resource
         """
-        url = urljoin(self.base_url, 'v3', resource)
+        url = urijoin(self.base_url, 'v3', resource)
 
         do_fetch = True
 
@@ -301,7 +302,7 @@ class PuppetForgeClient:
 
                 if next_url:
                     # Params are already included in the URL
-                    url = urljoin(self.base_url, next_url)
+                    url = urijoin(self.base_url, next_url)
                     params = {}
                 else:
                     do_fetch = False
