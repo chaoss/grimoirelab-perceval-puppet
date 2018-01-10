@@ -23,8 +23,6 @@
 import json
 import logging
 
-import requests
-
 from grimoirelab.toolkit.datetime import datetime_to_utc, str_to_datetime
 from grimoirelab.toolkit.uris import urijoin
 
@@ -33,6 +31,7 @@ from ...backend import (Backend,
                         BackendCommand,
                         BackendCommandArgumentParser,
                         metadata)
+from ...client import HttpClient
 from ...utils import DEFAULT_DATETIME
 
 
@@ -205,7 +204,7 @@ class PuppetForge(Backend):
         return result
 
 
-class PuppetForgeClient:
+class PuppetForgeClient(HttpClient):
     """Puppet forge REST API client.
 
     This class implements a simple client to retrieve data
@@ -230,7 +229,7 @@ class PuppetForgeClient:
     VRELEASE_DATE = 'release_date'
 
     def __init__(self, base_url, max_items=MAX_ITEMS):
-        self.base_url = base_url
+        super().__init__(base_url)
         self.max_items = max_items
 
     def modules(self):
@@ -291,8 +290,7 @@ class PuppetForgeClient:
             logger.debug("Puppet forge client calls resource: %s params: %s",
                          resource, str(params))
 
-            r = requests.get(url, params=params)
-            r.raise_for_status()
+            r = self.fetch(url, payload=params)
             yield r.text
 
             json_data = r.json()
