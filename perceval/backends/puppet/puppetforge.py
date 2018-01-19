@@ -29,8 +29,7 @@ from grimoirelab.toolkit.uris import urijoin
 
 from ...backend import (Backend,
                         BackendCommand,
-                        BackendCommandArgumentParser,
-                        metadata)
+                        BackendCommandArgumentParser)
 from ...client import HttpClient
 from ...utils import DEFAULT_DATETIME
 
@@ -50,18 +49,19 @@ class PuppetForge(Backend):
 
     :param max_items: maximum number of items requested on the same query
     :param tag: label used to mark the data
+    :param archive: archive to store/retrieve data
     """
-    version = '0.2.0'
+    version = '0.3.0'
 
-    def __init__(self, max_items=MAX_ITEMS, tag=None):
+    def __init__(self, max_items=MAX_ITEMS, tag=None, archive=None):
         origin = PUPPET_FORGE_URL
 
-        super().__init__(origin, tag=tag)
+        super().__init__(origin, tag=tag, archive=archive)
         self.max_items = max_items
-        self.client = PuppetForgeClient(PUPPET_FORGE_URL, max_items=max_items)
+        self.client = None
+
         self._owners = {}
 
-    @metadata
     def fetch(self, from_date=DEFAULT_DATETIME):
         """Fetch the modules from the server.
 
@@ -76,6 +76,21 @@ class PuppetForge(Backend):
 
         :returns: a generator of modules
         """
+        if not from_date:
+            from_date = DEFAULT_DATETIME
+
+        from_date = datetime_to_utc(from_date)
+
+        kwargs = {'from_date': from_date}
+        items = super().fetch("module", **kwargs)
+
+        return items
+
+    def fetch_items(self, **kwargs):
+        """Fetch the modules"""
+
+        from_date = kwargs['from_date']
+
         logger.info("Fetching modules from %s", str(from_date))
 
         from_date_ts = datetime_to_utc(from_date).timestamp()
@@ -111,39 +126,13 @@ class PuppetForge(Backend):
 
         logger.info("Fetch process completed: %s modules fetched", nmodules)
 
-    def __fetch_and_parse_releases(self, owner, module):
-        logger.debug("Fetching and parsing releases from '%s'-'%s'",
-                     owner, module)
-
-        releases = []
-        raw_pages = self.client.releases(owner, module)
-
-        for raw_page in raw_pages:
-            for release in self.parse_json(raw_page):
-                releases.append(release)
-
-        return releases
-
-    def __get_or_fetch_owner(self, owner):
-        if owner in self._owners:
-            return self._owners[owner]
-
-        logger.debug("Owner %s not found on client cache; fetching it", owner)
-
-        raw_owner = self.client.user(owner)
-        data = self.parse_json(raw_owner)
-
-        self._owners[owner] = data
-
-        return data
-
     @classmethod
-    def has_caching(cls):
-        """Returns whether it supports caching items on the fetch process.
+    def has_archiving(cls):
+        """Returns whether it supports archiving items on the fetch process.
 
-        :returns: this backend does not support items cache
+        :returns: this backend supports items archive
         """
-        return False
+        return True
 
     @classmethod
     def has_resuming(cls):
@@ -203,6 +192,37 @@ class PuppetForge(Backend):
 
         return result
 
+    def _init_client(self, from_archive=False):
+        """Init client"""
+
+        return PuppetForgeClient(PUPPET_FORGE_URL, self.max_items, self.archive, from_archive)
+
+    def __fetch_and_parse_releases(self, owner, module):
+        logger.debug("Fetching and parsing releases from '%s'-'%s'",
+                     owner, module)
+
+        releases = []
+        raw_pages = self.client.releases(owner, module)
+
+        for raw_page in raw_pages:
+            for release in self.parse_json(raw_page):
+                releases.append(release)
+
+        return releases
+
+    def __get_or_fetch_owner(self, owner):
+        if owner in self._owners:
+            return self._owners[owner]
+
+        logger.debug("Owner %s not found on client cache; fetching it", owner)
+
+        raw_owner = self.client.user(owner)
+        data = self.parse_json(raw_owner)
+
+        self._owners[owner] = data
+
+        return data
+
 
 class PuppetForgeClient(HttpClient):
     """Puppet forge REST API client.
@@ -212,6 +232,8 @@ class PuppetForgeClient(HttpClient):
 
     :param base_url: URL of the Puppet forge server
     :param max_items: number maximum of items per requested
+    :param archive: an archive to store/read fetched data
+    :param from_archive: it tells whether to write/read the archive
 
     :raises BackendError: when an error occurs initilizing the
         client
@@ -228,8 +250,8 @@ class PuppetForgeClient(HttpClient):
     VLATEST_RELEASE = 'latest_release'
     VRELEASE_DATE = 'release_date'
 
-    def __init__(self, base_url, max_items=MAX_ITEMS):
-        super().__init__(base_url)
+    def __init__(self, base_url, max_items=MAX_ITEMS, archive=None, from_archive=False):
+        super().__init__(base_url, archive=archive, from_archive=from_archive)
         self.max_items = max_items
 
     def modules(self):
@@ -317,7 +339,8 @@ class PuppetForgeCommand(BackendCommand):
     def setup_cmd_parser():
         """Returns the Puppet Forge argument parser."""
 
-        parser = BackendCommandArgumentParser(from_date=True)
+        parser = BackendCommandArgumentParser(from_date=True,
+                                              archive=True)
 
         # Puppet Forge options
         group = parser.parser.add_argument_group('Puppet Forge arguments')
