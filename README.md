@@ -1,4 +1,4 @@
-# perceval-puppet [![Build Status](https://travis-ci.org/grimoirelab/perceval-puppet.svg?branch=master)](https://travis-ci.org/grimoirelab/perceval-puppet) [![Coverage Status](https://img.shields.io/coveralls/grimoirelab/perceval-puppet.svg)](https://coveralls.io/r/grimoirelab/perceval-puppet?branch=master)
+# perceval-puppet [![Build Status](https://travis-ci.org/chaoss/grimoirelab-perceval-puppet.svg?branch=master)](https://travis-ci.org/chaoss/grimoirelab-perceval-puppet) [![Coverage Status](https://img.shields.io/coveralls/chaoss/grimoirelab-perceval-puppet.svg)](https://coveralls.io/r/chaoss/grimoirelab-perceval-puppet?branch=master)
 
 
 Bundle of Perceval backends for Puppet, Inc. ecosystem.
