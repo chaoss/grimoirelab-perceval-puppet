@@ -30,6 +30,7 @@ from perceval.backend import BackendCommandArgumentParser
 from perceval.backends.puppet.puppetforge import (PuppetForge,
                                                   PuppetForgeClient,
                                                   PuppetForgeCommand)
+from tests.base import TestCaseBackendArchive
 
 
 PUPPET_FORGE_URL = 'https://forge.puppet.com/'
@@ -128,7 +129,7 @@ class TestPuppetForgeBackend(unittest.TestCase):
         self.assertEqual(forge.origin, 'https://forge.puppet.com/')
         self.assertEqual(forge.tag, 'test')
         self.assertEqual(forge.max_items, 5)
-        self.assertIsInstance(forge.client, PuppetForgeClient)
+        self.assertIsNone(forge.client)
 
         # When tag is empty or None it will be set to
         # the value in URL
@@ -140,10 +141,10 @@ class TestPuppetForgeBackend(unittest.TestCase):
         self.assertEqual(forge.origin, 'https://forge.puppet.com/')
         self.assertEqual(forge.tag, 'https://forge.puppet.com/')
 
-    def test_has_caching(self):
-        """Test if it returns False when has_caching is called"""
+    def test_has_archiving(self):
+        """Test if it returns True when has_archiving is called"""
 
-        self.assertEqual(PuppetForge.has_caching(), False)
+        self.assertEqual(PuppetForge.has_archiving(), True)
 
     def test_has_resuming(self):
         """Test if it returns False when has_resuming is called"""
@@ -157,7 +158,7 @@ class TestPuppetForgeBackend(unittest.TestCase):
         http_requests = setup_http_server()
 
         forge = PuppetForge(max_items=2)
-        modules = [module for module in forge.fetch()]
+        modules = [module for module in forge.fetch(from_date=None)]
 
         expected = [('ceph', 'a7709201e03bfec46e34e4d0065bb8bdc3f4e5b9', 1484906394.0, 2, 'noris network AG'),
                     ('nomad', '2fea1072d8ef4d107839c20b7d9926574c4df587', 1484896006.0, 1, 'sshuyskiy'),
@@ -315,6 +316,39 @@ class TestPuppetForgeBackend(unittest.TestCase):
 
         self.assertEqual(result['username'], 'norisnetwork')
         self.assertEqual(result['display_name'], 'noris network AG')
+
+
+class TestPuppetForgeBackendArchive(TestCaseBackendArchive):
+    """PuppetForge backend tests using an archive"""
+
+    def setUp(self):
+        super().setUp()
+        self.backend = PuppetForge(max_items=2, archive=self.archive)
+
+    @httpretty.activate
+    def test_fetch_from_archive(self):
+        """Test whether it fetches a set of modules from archive"""
+
+        setup_http_server()
+        self._test_fetch_from_archive()
+
+    @httpretty.activate
+    def test_fetch_from_date_from_archive(self):
+        """Test whether if fetches a set of modules from the given date from archive"""
+
+        setup_http_server()
+
+        from_date = datetime.datetime(2017, 1, 20, 8, 0, 0)
+        self._test_fetch_from_archive(from_date=from_date)
+
+    @httpretty.activate
+    def test_fetch_empty(self):
+        """Test if nothing is returned when there are no modules in the archive"""
+
+        setup_http_server()
+
+        from_date = datetime.datetime(2017, 1, 21)
+        self._test_fetch_from_archive(from_date=from_date)
 
 
 class TestPuppetForgeClient(unittest.TestCase):
