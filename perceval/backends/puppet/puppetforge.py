@@ -33,12 +33,12 @@ from ...backend import (Backend,
 from ...client import HttpClient
 from ...utils import DEFAULT_DATETIME
 
-
-logger = logging.getLogger(__name__)
-
+CATEGORY_MODULE = "module"
 
 MAX_ITEMS = 100
 PUPPET_FORGE_URL = "https://forge.puppet.com/"
+
+logger = logging.getLogger(__name__)
 
 
 class PuppetForge(Backend):
@@ -51,7 +51,7 @@ class PuppetForge(Backend):
     :param tag: label used to mark the data
     :param archive: archive to store/retrieve data
     """
-    version = '0.3.0'
+    version = '0.4.0'
 
     def __init__(self, max_items=MAX_ITEMS, tag=None, archive=None):
         origin = PUPPET_FORGE_URL
@@ -62,7 +62,7 @@ class PuppetForge(Backend):
 
         self._owners = {}
 
-    def fetch(self, from_date=DEFAULT_DATETIME):
+    def fetch(self, category=CATEGORY_MODULE, from_date=DEFAULT_DATETIME):
         """Fetch the modules from the server.
 
         This method fetches a list of modules stored in the Puppet's
@@ -82,7 +82,7 @@ class PuppetForge(Backend):
         from_date = datetime_to_utc(from_date)
 
         kwargs = {'from_date': from_date}
-        items = super().fetch("module", **kwargs)
+        items = super().fetch(category, **kwargs)
 
         return items
 
@@ -172,7 +172,7 @@ class PuppetForge(Backend):
         This backend only generates one type of item which is
         'module'.
         """
-        return 'module'
+        return CATEGORY_MODULE
 
     @staticmethod
     def parse_json(raw_json):
