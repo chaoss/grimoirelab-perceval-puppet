@@ -51,7 +51,9 @@ class PuppetForge(Backend):
     :param tag: label used to mark the data
     :param archive: archive to store/retrieve data
     """
-    version = '0.4.0'
+    version = '0.4.1'
+
+    CATEGORIES = [CATEGORY_MODULE]
 
     def __init__(self, max_items=MAX_ITEMS, tag=None, archive=None):
         origin = PUPPET_FORGE_URL
