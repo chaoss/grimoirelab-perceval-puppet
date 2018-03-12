@@ -323,7 +323,8 @@ class TestPuppetForgeBackendArchive(TestCaseBackendArchive):
 
     def setUp(self):
         super().setUp()
-        self.backend = PuppetForge(max_items=2, archive=self.archive)
+        self.backend_write_archive = PuppetForge(max_items=2, archive=self.archive)
+        self.backend_read_archive = PuppetForge(max_items=2, archive=self.archive)
 
     @httpretty.activate
     def test_fetch_from_archive(self):
