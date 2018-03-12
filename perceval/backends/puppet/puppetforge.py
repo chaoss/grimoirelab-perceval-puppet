@@ -51,7 +51,7 @@ class PuppetForge(Backend):
     :param tag: label used to mark the data
     :param archive: archive to store/retrieve data
     """
-    version = '0.4.1'
+    version = '0.4.2'
 
     CATEGORIES = [CATEGORY_MODULE]
 
@@ -88,9 +88,14 @@ class PuppetForge(Backend):
 
         return items
 
-    def fetch_items(self, **kwargs):
-        """Fetch the modules"""
+    def fetch_items(self, category, **kwargs):
+        """Fetch the modules
 
+        :param category: the category of items to fetch
+        :param kwargs: backend arguments
+
+        :returns: a generator of items
+        """
         from_date = kwargs['from_date']
 
         logger.info("Fetching modules from %s", str(from_date))
