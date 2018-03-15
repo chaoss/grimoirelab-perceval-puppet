@@ -30,7 +30,7 @@ from perceval.backend import BackendCommandArgumentParser
 from perceval.backends.puppet.puppetforge import (PuppetForge,
                                                   PuppetForgeClient,
                                                   PuppetForgeCommand)
-from tests.base import TestCaseBackendArchive
+from base import TestCaseBackendArchive
 
 
 PUPPET_FORGE_URL = 'https://forge.puppet.com/'
