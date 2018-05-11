@@ -93,9 +93,7 @@ setup(name="perceval-puppet",
           'perceval.backends',
           'perceval.backends.puppet'
       ],
-      namespaces=[
-          'perceval.backends'
-      ],
+      namespace_packages=['perceval', 'perceval.backends'],
       install_requires=[
           'requests>=2.7.0',
           'grimoirelab-toolkit>=0.1.0',
