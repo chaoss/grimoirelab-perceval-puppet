@@ -50,9 +50,13 @@ class PuppetForge(Backend):
     :param tag: label used to mark the data
     :param archive: archive to store/retrieve data
     """
-    version = '0.4.2'
+    version = '0.5.0'
 
     CATEGORIES = [CATEGORY_MODULE]
+    EXTRA_SEARCH_FIELDS = {
+        'module_group': ['module_group'],
+        'slug': ['slug']
+    }
 
     def __init__(self, max_items=MAX_ITEMS, tag=None, archive=None):
         origin = PUPPET_FORGE_URL
