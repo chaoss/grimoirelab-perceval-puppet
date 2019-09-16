@@ -288,6 +288,36 @@ class TestPuppetForgeBackend(unittest.TestCase):
         for i in range(len(expected)):
             self.assertDictEqual(http_requests[i].querystring, expected[i])
 
+    @httpretty.activate
+    def test_search_fields(self):
+        """Test whether the search_fields is properly set"""
+
+        setup_http_server()
+
+        forge = PuppetForge(max_items=2)
+        modules = [module for module in forge.fetch()]
+
+        module = modules[0]
+        self.assertEqual(forge.metadata_id(module['data']), module['search_fields']['item_id'])
+        self.assertEqual(module['data']['module_group'], 'base')
+        self.assertEqual(module['data']['module_group'], module['search_fields']['module_group'])
+        self.assertEqual(module['data']['slug'], 'norisnetwork-ceph')
+        self.assertEqual(module['data']['slug'], module['search_fields']['slug'])
+
+        module = modules[1]
+        self.assertEqual(forge.metadata_id(module['data']), module['search_fields']['item_id'])
+        self.assertEqual(module['data']['module_group'], 'base')
+        self.assertEqual(module['data']['module_group'], module['search_fields']['module_group'])
+        self.assertEqual(module['data']['slug'], 'sshuyskiy-nomad')
+        self.assertEqual(module['data']['slug'], module['search_fields']['slug'])
+
+        module = modules[2]
+        self.assertEqual(forge.metadata_id(module['data']), module['search_fields']['item_id'])
+        self.assertEqual(module['data']['module_group'], 'base')
+        self.assertEqual(module['data']['module_group'], module['search_fields']['module_group'])
+        self.assertEqual(module['data']['slug'], 'sshuyskiy-consul')
+        self.assertEqual(module['data']['slug'], module['search_fields']['slug'])
+
     def test_parse_json(self):
         """Test if it parses a JSON stream"""
 
