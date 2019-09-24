@@ -493,7 +493,7 @@ class TestPuppetForgeCommand(unittest.TestCase):
 
         parser = PuppetForgeCommand.setup_cmd_parser()
         self.assertIsInstance(parser, BackendCommandArgumentParser)
-        self.assertEqual(parser._categories, PuppetForge.CATEGORIES)
+        self.assertEqual(parser._backend, PuppetForge)
 
         args = ['--max-items', '5',
                 '--tag', 'test',
