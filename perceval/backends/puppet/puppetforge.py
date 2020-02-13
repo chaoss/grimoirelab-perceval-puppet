@@ -17,6 +17,7 @@
 #
 # Authors:
 #     Santiago Dueñas <sduenas@bitergia.com>
+#     Quan Zhou <quan@bitergia.com>
 #
 
 import json
@@ -49,8 +50,9 @@ class PuppetForge(Backend):
     :param max_items: maximum number of items requested on the same query
     :param tag: label used to mark the data
     :param archive: archive to store/retrieve data
+    :param ssl_verify: enable/disable SSL verification
     """
-    version = '0.5.0'
+    version = '0.6.0'
 
     CATEGORIES = [CATEGORY_MODULE]
     EXTRA_SEARCH_FIELDS = {
@@ -58,10 +60,10 @@ class PuppetForge(Backend):
         'slug': ['slug']
     }
 
-    def __init__(self, max_items=MAX_ITEMS, tag=None, archive=None):
+    def __init__(self, max_items=MAX_ITEMS, tag=None, archive=None, ssl_verify=True):
         origin = PUPPET_FORGE_URL
 
-        super().__init__(origin, tag=tag, archive=archive)
+        super().__init__(origin, tag=tag, archive=archive, ssl_verify=ssl_verify)
         self.max_items = max_items
         self.client = None
 
@@ -205,7 +207,7 @@ class PuppetForge(Backend):
     def _init_client(self, from_archive=False):
         """Init client"""
 
-        return PuppetForgeClient(PUPPET_FORGE_URL, self.max_items, self.archive, from_archive)
+        return PuppetForgeClient(PUPPET_FORGE_URL, self.max_items, self.archive, from_archive, self.ssl_verify)
 
     def __fetch_and_parse_releases(self, owner, module):
         logger.debug("Fetching and parsing releases from '%s'-'%s'",
@@ -244,6 +246,7 @@ class PuppetForgeClient(HttpClient):
     :param max_items: number maximum of items per requested
     :param archive: an archive to store/read fetched data
     :param from_archive: it tells whether to write/read the archive
+    :param ssl_verify: enable/disable SSL verification
 
     :raises BackendError: when an error occurs initilizing the
         client
@@ -260,8 +263,8 @@ class PuppetForgeClient(HttpClient):
     VLATEST_RELEASE = 'latest_release'
     VRELEASE_DATE = 'release_date'
 
-    def __init__(self, base_url, max_items=MAX_ITEMS, archive=None, from_archive=False):
-        super().__init__(base_url, archive=archive, from_archive=from_archive)
+    def __init__(self, base_url, max_items=MAX_ITEMS, archive=None, from_archive=False, ssl_verify=True):
+        super().__init__(base_url, archive=archive, from_archive=from_archive, ssl_verify=ssl_verify)
         self.max_items = max_items
 
     def modules(self):
@@ -351,7 +354,8 @@ class PuppetForgeCommand(BackendCommand):
 
         parser = BackendCommandArgumentParser(cls.BACKEND,
                                               from_date=True,
-                                              archive=True)
+                                              archive=True,
+                                              ssl_verify=True)
 
         # Puppet Forge options
         group = parser.parser.add_argument_group('Puppet Forge arguments')
