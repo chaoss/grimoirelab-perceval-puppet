@@ -17,6 +17,7 @@
 #
 # Authors:
 #     Santiago Dueñas <sduenas@bitergia.com>
+#     Quan Zhou <quan@bitergia.com>
 #
 
 import datetime
@@ -129,16 +130,19 @@ class TestPuppetForgeBackend(unittest.TestCase):
         self.assertEqual(forge.tag, 'test')
         self.assertEqual(forge.max_items, 5)
         self.assertIsNone(forge.client)
+        self.assertTrue(forge.ssl_verify)
 
         # When tag is empty or None it will be set to
         # the value in URL
-        forge = PuppetForge(max_items=5)
+        forge = PuppetForge(max_items=5, ssl_verify=False)
         self.assertEqual(forge.origin, 'https://forge.puppet.com/')
         self.assertEqual(forge.tag, 'https://forge.puppet.com/')
+        self.assertFalse(forge.ssl_verify)
 
         forge = PuppetForge(max_items=5, tag='')
         self.assertEqual(forge.origin, 'https://forge.puppet.com/')
         self.assertEqual(forge.tag, 'https://forge.puppet.com/')
+        self.assertTrue(forge.ssl_verify)
 
     def test_has_archiving(self):
         """Test if it returns True when has_archiving is called"""
@@ -395,6 +399,12 @@ class TestPuppetForgeClient(unittest.TestCase):
         client = PuppetForgeClient(PUPPET_FORGE_URL, max_items=2)
         self.assertEqual(client.base_url, PUPPET_FORGE_URL)
         self.assertEqual(client.max_items, 2)
+        self.assertTrue(client.ssl_verify)
+
+        client = PuppetForgeClient(PUPPET_FORGE_URL, ssl_verify=False)
+        self.assertEqual(client.base_url, PUPPET_FORGE_URL)
+        self.assertEqual(client.max_items, 100)
+        self.assertFalse(client.ssl_verify)
 
     @httpretty.activate
     def test_modules(self):
@@ -506,6 +516,13 @@ class TestPuppetForgeCommand(unittest.TestCase):
         self.assertEqual(parsed_args.max_items, 5)
         self.assertEqual(parsed_args.tag, 'test')
         self.assertEqual(parsed_args.from_date, expected_ts)
+        self.assertTrue(parsed_args.ssl_verify)
+
+        args = ['--max-items', '5', '--no-ssl-verify']
+
+        parsed_args = parser.parse(*args)
+        self.assertEqual(parsed_args.max_items, 5)
+        self.assertFalse(parsed_args.ssl_verify)
 
 
 if __name__ == "__main__":
