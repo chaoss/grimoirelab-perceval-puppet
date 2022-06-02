@@ -1,6 +1,6 @@
 # perceval-puppet [![Build Status](https://github.com/chaoss/grimoirelab-perceval-puppet/workflows/tests/badge.svg)](https://github.com/chaoss/grimoirelab-perceval-puppet/actions?query=workflow:tests+branch:master+event:push) [![Coverage Status](https://img.shields.io/coveralls/chaoss/grimoirelab-perceval-puppet.svg)](https://coveralls.io/r/chaoss/grimoirelab-perceval-puppet?branch=master)
 
-Bundle of Perceval backends for Puppet, Inc. ecosystem.
+Bundle of Perceval backends for Puppet ecosystem.
 
 ## Backends
 
@@ -10,10 +10,10 @@ The backends currently managed by this package support the next repositories:
 
 ## Requirements
 
-* Python >= 3.7
-* python3-requests >= 2.7
-* grimoirelab-toolkit > = 0.2.0
-* perceval >= 0.12.12
+These set of backends requires Python 3.7 or later, and
+[Perceval](https://github.com/chaoss/grimoirelab-perceval/) to run.
+For other Python dependencies, please check the `pyproject.toml`
+file included on this repository.
 
 ## Installation
 
