@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "perceval-puppet"
-version = "0.2.13"
+version = "0.2.14-rc.1"
 description = "Bundle of Perceval backends for Puppet, Inc. ecosystem."
 authors = [
     "GrimoireLab Developers"
