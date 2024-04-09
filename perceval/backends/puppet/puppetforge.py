@@ -52,7 +52,7 @@ class PuppetForge(Backend):
     :param archive: archive to store/retrieve data
     :param ssl_verify: enable/disable SSL verification
     """
-    version = '0.6.0'
+    version = '1.0.0'
 
     CATEGORIES = [CATEGORY_MODULE]
     EXTRA_SEARCH_FIELDS = {
